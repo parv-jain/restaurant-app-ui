@@ -19,7 +19,6 @@ export class ListPage implements OnInit {
   ngOnInit($event ?) {
     this.apiService.fetchPaginatedRestaurantsData(this.page, this.size).subscribe((data) => {
       this.restaurants = data;
-      console.log(this.restaurants);
     }, (err) => {
       this.presentToastWithOptions("Some network error occured. Please try after some time.");
     });
@@ -31,7 +30,6 @@ export class ListPage implements OnInit {
     if(this.searchQuery.length >= 3){
       this.apiService.fetchSearchedRestaurantData(this.searchQuery).subscribe((data) => {   
         this.restaurants = data;
-        console.log(this.restaurants);
       }, (err) => {
         this.presentToastWithOptions("Some network error occured. Please try after some time.");
       });  
@@ -58,9 +56,16 @@ export class ListPage implements OnInit {
   sort(by, order){
     this.apiService.fetchSortedRestaurantData(by, order).subscribe((data) => {
       this.restaurants = data;
-      console.log(this.restaurants);
     }, (err) => {
       this.presentToastWithOptions("Some network error occured. Please try after some time.");
     });
+  }
+
+  completeInfo(id){
+    this.apiService.fetchCompleteRestaurantDetails(id).subscribe((data) => {
+
+    }, (err) => {
+      this.presentToastWithOptions("Some network error occured. Please try after some time.");
+    })
   }
 }

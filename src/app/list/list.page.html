@@ -33,7 +33,7 @@
       <ion-item>
         <ion-icon name="pin" slot="start"></ion-icon>
         <ion-label>{{restaurant.restaurant_name}}</ion-label>
-        <ion-button fill="outline" slot="end">View</ion-button>
+        <ion-button fill="outline" slot="end" (click)="completeInfo(restaurant._id)">View</ion-button>
       </ion-item>
     
       <ion-card-content>
