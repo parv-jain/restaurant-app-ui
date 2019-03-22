@@ -1,4 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import { ApiService } from '../../services/api.service';
+import { ToastController } from '@ionic/angular';
 
 @Component({
   selector: 'app-list',
@@ -6,34 +8,59 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['list.page.scss']
 })
 export class ListPage implements OnInit {
-  private selectedItem: any;
-  private icons = [
-    'flask',
-    'wifi',
-    'beer',
-    'football',
-    'basketball',
-    'paper-plane',
-    'american-football',
-    'boat',
-    'bluetooth',
-    'build'
-  ];
-  public items: Array<{ title: string; note: string; icon: string }> = [];
-  constructor() {
-    for (let i = 1; i < 11; i++) {
-      this.items.push({
-        title: 'Item ' + i,
-        note: 'This is item #' + i,
-        icon: this.icons[Math.floor(Math.random() * this.icons.length)]
-      });
+  private restaurants: any;
+  private page: number = 1;
+  private size: number = 100;
+  private searchQuery: string = '';
+  constructor(private apiService: ApiService, private toastCtrl: ToastController) {
+  }
+
+  //act as refresh data function, and call each time app is initialised / refreshed
+  ngOnInit($event ?) {
+    this.apiService.fetchPaginatedRestaurantsData(this.page, this.size).subscribe((data) => {
+      this.restaurants = data;
+      console.log(this.restaurants);
+    }, (err) => {
+      this.presentToastWithOptions("Some network error occured. Please try after some time.");
+    });
+  }
+
+  //to show search query filtered data (min. 3 letters required to hit search api)
+  onInput(ev){
+    this.searchQuery = ev.target.value.replace(/[^\w\s]/gi, '');
+    if(this.searchQuery.length >= 3){
+      this.apiService.fetchSearchedRestaurantData(this.searchQuery).subscribe((data) => {   
+        this.restaurants = data;
+        console.log(this.restaurants);
+      }, (err) => {
+        this.presentToastWithOptions("Some network error occured. Please try after some time.");
+      });  
+    }
+    else{
+      //Refresh data to show all restaurants (used in case user cleans search query)
+      this.ngOnInit();
     }
   }
 
-  ngOnInit() {
+  async presentToastWithOptions(message) {
+    const toast = await this.toastCtrl.create({
+      message: message,
+      color: "primary",
+      showCloseButton: true,
+      position: 'bottom',
+      duration: 5000,
+      closeButtonText: 'Dismiss'
+    });
+    toast.present();
   }
-  // add back when alpha.4 is out
-  // navigate(item) {
-  //   this.router.navigate(['/list', JSON.stringify(item)]);
-  // }
+
+  //to sort data and render sorted filtered data
+  sort(by, order){
+    this.apiService.fetchSortedRestaurantData(by, order).subscribe((data) => {
+      this.restaurants = data;
+      console.log(this.restaurants);
+    }, (err) => {
+      this.presentToastWithOptions("Some network error occured. Please try after some time.");
+    });
+  }
 }
